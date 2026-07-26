@@ -8,17 +8,40 @@ import pandas as pd
 logger = logging.getLogger(__name__)
 
 
-def read_table_csv(table_obj, csv_seperator=","):
+def read_table_hdf(table_obj, csv_seperator=','):
     """
-    Reads csv from path, renames columns and drops unnecessary columns
+    Reads hdf from path, renames columns and drops unnecessary columns
     """
-    df_rows = pd.read_csv(table_obj.csv_file_location, header=None, escapechar='\\', encoding='utf-8', quotechar='"',
-                          sep=csv_seperator)
+    df_rows = pd.read_hdf(table_obj.csv_file_location)
     df_rows.columns = [table_obj.table_name + '.' + attr for attr in table_obj.attributes]
 
     for attribute in table_obj.irrelevant_attributes:
         df_rows = df_rows.drop(table_obj.table_name + '.' + attribute, axis=1)
+        
+    return df_rows.apply(pd.to_numeric, errors="ignore")
 
+
+def read_table_csv(table_obj, csv_seperator=',', stats=False):
+    """
+    Reads csv from path, renames columns and drops unnecessary columns
+    Set stats to True for stats dataset
+    """
+    if stats:
+        df_rows = pd.read_csv(table_obj.csv_file_location)
+    else:
+        #print(table_obj.csv_file_location)
+        df_rows = pd.read_csv(table_obj.csv_file_location, header=None, escapechar='\\', encoding='utf-8',
+                              quotechar='"',
+                              sep=csv_seperator)
+    
+    #print(df_rows.head(5))
+    #print(len(df_rows.columns), len(table_obj.attributes))
+    df_rows.columns = [table_obj.table_name + '.' + attr for attr in table_obj.attributes]
+
+    for attribute in table_obj.irrelevant_attributes:
+        df_rows = df_rows.drop(table_obj.table_name + '.' + attribute, axis=1)
+    print("!!!!!!!!!!!!!!!!!!!!!!!!!")
+    print(df_rows.columns)
     return df_rows.apply(pd.to_numeric, errors="ignore")
     # return df_rows.convert_objects()
 
@@ -36,10 +59,11 @@ def find_relationships(schema_graph, table, incoming=True):
     return relationships
 
 
-def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv_seperator=",",
+def prepare_single_table(schema_graph, table, path, max_distinct_vals=1000000, csv_seperator=',',
                          max_table_data=20000000):
     """
     Reads table csv. Adds multiplier fields, missing value imputation, dict for categorical data. Adds null tuple tables.
+
     :param schema_graph:
     :param table:
     :return:
@@ -145,7 +169,7 @@ def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv
 
         # categorical value
         if table_data.dtypes[attribute] == object:
-
+            # print(attribute, table_data[attribute].dtypes)
             logger.debug("\t\tPreparing categorical values for column {}".format(rel_attribute))
 
             distinct_vals = table_data[attribute].unique()
@@ -188,6 +212,7 @@ def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv
 
                 # not the best solution but works
                 unique_null_val = table_data[attribute].mean() + 0.0001
+                unique_null_val = -np.abs(unique_null_val) - 100000
                 assert not (table_data[attribute] == unique_null_val).any()
 
                 table_data[attribute] = table_data[attribute].fillna(unique_null_val)
@@ -201,6 +226,8 @@ def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv
     logger.info("Relevant attributes for table {} are {}".format(table, relevant_attributes))
     logger.info("NULL values for table {} are {}".format(table, table_meta_data['null_values_column']))
     del_cat_attributes = [table + '.' + rel_attribute for rel_attribute in del_cat_attributes]
+    print("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@")
+    print(del_cat_attributes, table_data.columns)
     table_data = table_data.drop(columns=del_cat_attributes)
 
     assert len(relevant_attributes) == len(table_meta_data['null_values_column']), \
@@ -213,7 +240,8 @@ def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv
 
     # save modified table
     if len(table_data) < max_table_data:
-        table_data.to_hdf(path, key='df', format='table')
+        # table_data.to_hdf(path, key='df')
+        table_data.to_hdf(path, key='df')#, format='table')
     else:
         table_data.sample(max_table_data).to_hdf(path, key='df', format='table')
 
@@ -229,7 +257,9 @@ def prepare_single_table(schema_graph, table, path, max_distinct_vals=10000, csv
 
         left_attribute = table + '.' + relationship_obj.end_attr
         right_attribute = neighbor_table + '.' + relationship_obj.start_attr
-
+        
+        print("====================================")
+        print(table_data.columns, left_attribute)
         table_data = table_data.set_index(left_attribute, drop=False)
         neighbor_table_data = read_table_csv(neighbor_table_obj, csv_seperator=csv_seperator).set_index(right_attribute,
                                                                                                         drop=False)
@@ -265,6 +295,6 @@ def prepare_all_tables(schema_graph, path, csv_seperator=',', max_table_data=200
     prep_end_t = perf_counter()
 
     with open(path + '/build_time_hdf.txt', "w") as text_file:
-        text_file.write(str(round(prep_end_t-prep_start_t)))
+        text_file.write(str(round(prep_end_t - prep_start_t)))
 
     return meta_data

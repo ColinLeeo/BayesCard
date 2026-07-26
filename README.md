@@ -1,3 +1,5 @@
+Note: This is a copy of the repository https://github.com/wuziniu/BayesCard. It is copied here in the interest of experimental replicability.
+
 # BayesCard
 
 ## Environment setup
@@ -6,8 +8,7 @@
   conda env create -f environment.yml
   ```
   If not, you need to manually download the following packages
-  Required dependence: numpy, scipy, pandas, Pgmpy, pomegranate, networkx, tqdm, joblib, pytorch, psycopg2, scikit-learn, spflow, tables
-  
+  Required dependence: numpy, scipy, pandas, Pgmpy, pomegranate, networkx, tqdm, joblib, pytorch, psycopg2, scikit-learn, 
   Additional dependence: numba, bz2, Pyro (These packages are not required to reproduce the result in the paper.)
   
 ## Dataset download:
@@ -97,19 +98,11 @@ The optimal trained models for each dataset are already stored. If you are only 
    ```
    python run_experiment.py --dataset imdb 
           --evaluate_cardinalities
-          --model_path Benchmark/IMDB
+          --model_path Benchmark/IMDB/
           --query_file_location Benchmark/IMDB/job-light.sql
           --learning_algo chow-liu
           --max_parents 1
           --infer_algo exact-jit
    ```
-   If you find the code helpful, please cite our paper:
-   ```
-   @article{wu2020bayescard,
-    title={BayesCard: Revitilizing Bayesian Frameworks for Cardinality Estimation},
-    author={Wu, Ziniu and Shaikhha, Amir and Zhu, Rong and Zeng, Kai and Han, Yuxing and Zhou, Jingren},
-    journal={arXiv preprint arXiv:2012.14743},
-    year={2020}
-    }
-   ```
   
+

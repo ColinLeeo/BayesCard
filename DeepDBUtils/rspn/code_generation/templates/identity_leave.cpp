@@ -1,5 +1,6 @@
 if (relevantScope[{node_scope}]) {{
-    if (featureScope[{node_scope}]) {{
+    if (featureScope[{node_scope}]
+    ) {{
         if (inverse{node_scope}) {{
             nodeIntermediateResult[{node_id}] = {inverted_mean};
         }} else {{
