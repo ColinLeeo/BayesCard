@@ -2,12 +2,17 @@ from .base import Inference
 from .ExactInference import BeliefPropagation
 from .ExactInference import VariableElimination
 from .ExactInference import VariableEliminationJIT
-from .ExactInferenceTorch import VariableEliminationJIT_torch
 
 __all__ = [
     "Inference",
     "VariableElimination",
     "BeliefPropagation",
     "VariableEliminationJIT",
-    "VariableEliminationJIT_torch",
 ]
+
+try:
+    from .ExactInferenceTorch import VariableEliminationJIT_torch
+except ImportError:
+    VariableEliminationJIT_torch = None
+else:
+    __all__.append("VariableEliminationJIT_torch")
