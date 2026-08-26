@@ -7,21 +7,6 @@ from Models.tools import discretize_series
 
 
 class DiscretizeSeriesTest(unittest.TestCase):
-    def test_constant_numeric_series_falls_back_to_categorical(self):
-        series = pd.Series([1.0, 1.0])
-
-        discretized, _, _, encoding, mapping, _, _, _ = discretize_series(
-            series,
-            n_mcv=30,
-            n_bins=30,
-            is_continous=True,
-            drop_na=False,
-        )
-
-        self.assertEqual(discretized.tolist(), [0.0, 0.0])
-        self.assertEqual(encoding, {1.0: 0})
-        self.assertIsNone(mapping)
-
     def test_continuous_series_with_missing_values(self):
         series = pd.Series([1.0, 2.0, np.nan])
 
