@@ -86,7 +86,8 @@ def discretize_series(series: pd.Series, n_mcv, n_bins, is_continous=False, cont
         fanout_sum = []
 
         # map interval object to int category for efficient training
-        for interval in sorted(list(temp.unique()), key=lambda x: x.left):
+        intervals = [interval for interval in temp.unique() if pd.notna(interval)]
+        for interval in sorted(intervals, key=lambda x: x.left):
             categ[interval] = val
             mapping[val] = interval
             if fanout != 0:
@@ -185,5 +186,4 @@ META_TYPE_MAP = {
     MetaType.BINARY: [Type.BINARY],
     MetaType.DISCRETE: [Type.CATEGORICAL, Type.ORDINAL, Type.COUNT],
 }
-
 

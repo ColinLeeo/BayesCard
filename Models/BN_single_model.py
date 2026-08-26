@@ -160,7 +160,8 @@ class BN_Single():
 
             old_mapping_reversed = {old_mapping[v]: v for v in old_mapping}
             # map interval object to int category for efficient training
-            for interval in sorted(list(temp.unique()), key=lambda x: x.left):
+            intervals = [interval for interval in temp.unique() if pd.notna(interval)]
+            for interval in sorted(intervals, key=lambda x: x.left):
                 if interval in old_mapping_reversed:
                     categ[interval] = old_mapping_reversed[interval]
                 else:
