@@ -71,7 +71,11 @@ def discretize_series(series: pd.Series, n_mcv, n_bins, is_continous=False, cont
     encoding = dict()
     mapping = dict()
 
-    if is_continous or (s.nunique() >= len(s) / 30 and isinstance(s.iloc[0], numbers.Number)):
+    n_unique = s.nunique()
+    if n_unique > 1 and (
+        is_continous
+        or (n_unique >= len(s) / 30 and isinstance(s.iloc[0], numbers.Number))
+    ):
         # Under this condition, we can assume we are dealing with continuous data
         # Histogram for continuous data
         if not continuous_bins:
@@ -186,4 +190,3 @@ META_TYPE_MAP = {
     MetaType.BINARY: [Type.BINARY],
     MetaType.DISCRETE: [Type.CATEGORICAL, Type.ORDINAL, Type.COUNT],
 }
-
