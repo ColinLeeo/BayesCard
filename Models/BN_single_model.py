@@ -3,6 +3,7 @@ import time
 import bz2
 import pickle
 import logging
+import numbers
 import numpy as np
 import pandas as pd
 
@@ -342,10 +343,7 @@ class BN_Single():
 
 
     def is_numeric(self, val):
-        if isinstance(val, int):
-            return True
-        if isinstance(val, float):
-            return True
+        return isinstance(val, numbers.Number)
 
     def get_attr_type(self, dataset, threshold=3000):
         attr_type = dict()
